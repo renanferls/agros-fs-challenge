@@ -12,4 +12,5 @@ urlpatterns = [
     path('crop-report/', CropReportListCreate.as_view()),
     path('crop-report/<int:pk>/', CropReportReadUpdateDelete.as_view()),
 
+    path('search-reports/', SearchReports.as_view()),
 ]

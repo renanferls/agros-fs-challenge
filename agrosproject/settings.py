@@ -96,10 +96,15 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'TITLE',
-    'DESCRIPTION': 'Your project description',
+    'TITLE': 'AGROS FS CHALLENGE',
+    'DESCRIPTION': 'AGROS Full Stack challenge - AGROS Impact Bootcamp',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'CONTACT': {
+        'name':'Renan Leva',
+        'url': 'https://www.linkedin.com/in/renan-ferdinand-leva-salas/',
+        'email': 'renanfer14.ls@gmail.com'
+    }
 }
 
 

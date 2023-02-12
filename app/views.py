@@ -1,4 +1,5 @@
 from django.db.models import ProtectedError
+from django.db.models import Q
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -188,6 +189,8 @@ class CropReadUpdateDelete(APIView):
                 {'message': f'Crop with id {pk} cannot be deleted, some instances refers to it'}, 
                 status=status.HTTP_406_NOT_ACCEPTABLE)
 
+
+# Crop Reports View
 class CropReportListCreate(APIView):
     @extend_schema(
         request=None,
@@ -273,3 +276,33 @@ class CropReportReadUpdateDelete(APIView):
             return Response(
                 {'message': f'Crop Report with id {pk} cannot be deleted, some instances refers to it'}, 
                 status=status.HTTP_406_NOT_ACCEPTABLE)
+
+
+# Sercher for crop reports using keywords
+class SearchReports(APIView):
+    @extend_schema(
+        request=None,
+        parameters=[
+            OpenApiParameter(name="keywords", description="keywords", type=str),
+        ],
+    )
+    def get(self, request, *args, **kwargs):        
+        keywords = request.query_params.get('keywords', None)
+        if keywords:
+            keywords = keywords.split(',')
+            all_reports = CropReports.objects.all()
+            reports = CropReports.objects.none()
+            for keyword in keywords:
+                reports |= all_reports.filter(Q(reportName__icontains=keyword) | Q(reportStr__icontains=keyword))
+            if reports:
+                serializer = CropReportSerializer(reports, many=True)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(
+                {'message': 'No matching reports found'},
+                status=status.HTTP_200_OK)
+        
+        return Response(
+            {'message': 'No given keywords'},
+        status=status.HTTP_200_OK)
+
+       
