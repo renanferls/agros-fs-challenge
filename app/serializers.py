@@ -13,9 +13,20 @@ class CropSerializer(serializers.ModelSerializer):
         model = Crop
         exclude = ['createdAt', 'updatedAt', 'id']
 
+class CropCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Crop
+        exclude = ['createdAt', 'updatedAt', 'id']
+
 class CropReportSerializer(serializers.ModelSerializer):
     producerId = ProducerSerializer()
     cropId = CropSerializer()
+    class Meta:
+        model = CropReports
+        exclude = ['createdAt', 'updatedAt', 'id']
+
+
+class CropReportCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CropReports
         exclude = ['createdAt', 'updatedAt', 'id']

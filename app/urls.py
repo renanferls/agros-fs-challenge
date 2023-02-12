@@ -3,13 +3,13 @@ from django.urls import path
 from .views import *
 
 urlpatterns = [
-    path('producer/', ProducerView.as_view()),
-    path('producer/<int:pk>', ProducerView.as_view()),
+    path('producer/', ProducerListCreate.as_view()),
+    path('producer/<int:pk>/', ProducerReadUpdateDelete.as_view()),
 
-    path('crop/', CropView.as_view()),
-    path('crop/<int:pk>', CropView.as_view()),
+    path('crop/', CropListCreate.as_view()),
+    path('crop/<int:pk>/', CropReadUpdateDelete.as_view()),
 
-    path('crop-report/', CropReportView.as_view()),
-    path('crop-report/<int:pk>', CropReportView.as_view()),
+    path('crop-report/', CropReportListCreate.as_view()),
+    path('crop-report/<int:pk>/', CropReportReadUpdateDelete.as_view()),
 
 ]

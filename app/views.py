@@ -7,17 +7,45 @@ from rest_framework import status
 from .models import Crop, CropReports, Producer
 from .serializers import *
 
-
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 # Create your views here.
 
-class ProducerView(APIView):
+# PRODUCERS VIEW
 
-    def get(self, request, pk=None):
-        if pk is None:
+class ProducerListCreate(APIView):
+    @extend_schema(
+        request=None,
+        responses={200: ProducerSerializer},
+        description='Retrieve a list of all producers',
+        methods=["GET"]
+    )
+    def get(self, request):
             query = Producer.objects.all()
             serializer = ProducerSerializer(query, many=True)
             return Response(serializer.data)
-        
+    
+    @extend_schema(
+        request=ProducerSerializer,
+        responses={201: ProducerSerializer},
+        description='Create a new producer',
+        methods=["POST"]
+    )
+    def post(self, request, format=None):        
+        serializer = ProducerSerializer(data=request.data)
+
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+class ProducerReadUpdateDelete(APIView):
+    @extend_schema(
+        request=None,
+        responses={200: ProducerSerializer},
+        description='Retrieve a single producer',
+        methods=["GET"]
+    )
+    def get(self, request, pk):
         try:
             query = Producer.objects.get(id=pk)
             serializer = ProducerSerializer(query)
@@ -28,18 +56,13 @@ class ProducerView(APIView):
                 {'message': f'Producer with id {pk} not found'}, 
                 status=status.HTTP_404_NOT_FOUND)
     
-
-    def post(self, request, format=None):
-
-        serializer = ProducerSerializer(data=request.data)
-
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    
-    def put(self, request, pk):
-        
+    @extend_schema(
+        request=ProducerSerializer,
+        responses={200: ProducerSerializer},
+        description='Update a single producer',
+        methods=["PUT"]
+    )
+    def put(self, request, pk):        
         try:
             producerItem = Producer.objects.get(id=pk)
             serializer = ProducerSerializer(producerItem, data=request.data)
@@ -52,9 +75,13 @@ class ProducerView(APIView):
                 {'message': f'Producer with id {pk} not found'}, 
                 status=status.HTTP_404_NOT_FOUND)       
                 
-
-    def delete(self, request, pk):
-        
+    @extend_schema(
+        request=None,
+        responses={200: None},
+        description='delete a single producer',
+        methods=["DELETE"]
+    )
+    def delete(self, request, pk):        
         try:
             producerItem = Producer.objects.get(id=pk)
             producerItem.delete()
@@ -73,14 +100,41 @@ class ProducerView(APIView):
                 status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
-class CropView(APIView):
+# CROPS VIEW
 
-    def get(self, request, pk=None):
-        if pk is None:
-            query = Crop.objects.all()
-            serializer = CropSerializer(query, many=True)
-            return Response(serializer.data)
-        
+class CropListCreate(APIView):
+    @extend_schema(
+        request=None,
+        responses={200: CropSerializer},
+        description='Retrieve a list of all crops',
+        methods=["GET"]
+    )
+    def get(self, request):
+        query = Crop.objects.all()
+        serializer = CropSerializer(query, many=True)
+        return Response(serializer.data)
+    
+    @extend_schema(
+        request=CropCreateSerializer,
+        responses={200: None},
+        description='Create a new crop',
+        methods=["POST"]
+    )
+    def post(self, request, format=None):
+        serializer = CropCreateSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class CropReadUpdateDelete(APIView):
+    @extend_schema(
+        request=None,
+        responses={200: CropSerializer},
+        description='Retrieve a single crop',
+        methods=["GET"]
+    )
+    def get(self, request, pk):        
         try:
             query = Crop.objects.get(id=pk)
             serializer = CropSerializer(query)
@@ -91,21 +145,16 @@ class CropView(APIView):
                 {'message': f'Crop with id {pk} not found'}, 
                 status=status.HTTP_404_NOT_FOUND)
     
-
-    def post(self, request, format=None):
-
-        serializer = CropSerializer(data=request.data)
-
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    
+    @extend_schema(
+        request=CropCreateSerializer,
+        responses={200: CropCreateSerializer},
+        description='Update a single crop',
+        methods=["PUT"]
+    )
     def put(self, request, pk):
-        
         try:
             cropItem = Crop.objects.get(id=pk)
-            serializer = CropSerializer(cropItem, data=request.data)
+            serializer = CropCreateSerializer(cropItem, data=request.data)
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -114,10 +163,14 @@ class CropView(APIView):
             return Response(
                 {'message': f'Crop with id {pk} not found'}, 
                 status=status.HTTP_404_NOT_FOUND)       
-                
 
-    def delete(self, request, pk):
-        
+    @extend_schema(
+        request=None,
+        responses={200: None},
+        description='delete a single crop',
+        methods=["DELETE"]
+    )      
+    def delete(self, request, pk):        
         try:
             cropItem = Crop.objects.get(id=pk)
             cropItem.delete()
@@ -135,15 +188,39 @@ class CropView(APIView):
                 {'message': f'Crop with id {pk} cannot be deleted, some instances refers to it'}, 
                 status=status.HTTP_406_NOT_ACCEPTABLE)
 
+class CropReportListCreate(APIView):
+    @extend_schema(
+        request=None,
+        responses={200: CropReportSerializer},
+        description='Retrieve a list of all crop reports',
+        methods=["GET"]
+    )
+    def get(self, request):
+        query = CropReports.objects.all()
+        serializer = CropReportSerializer(query, many=True)
+        return Response(serializer.data)
+    
+    @extend_schema(
+        request=CropReportCreateSerializer,
+        responses={201: None},
+        description='Create a new crop report',
+        methods=["POST"]
+    )
+    def post(self, request, format=None):
+        serializer = CropReportCreateSerializer(data=request.data)
 
-class CropReportView(APIView):
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def get(self, request, pk=None):
-        if pk is None:
-            query = CropReports.objects.all()
-            serializer = CropReportSerializer(query, many=True)
-            return Response(serializer.data)
-        
+class CropReportReadUpdateDelete(APIView):
+    @extend_schema(
+        request=None,
+        responses={200: CropReportSerializer},
+        description='Retrieve a single crop report',
+        methods=["GET"]
+    )
+    def get(self, request, pk):
         try:
             query = CropReports.objects.get(id=pk)
             serializer = CropReportSerializer(query)
@@ -153,22 +230,17 @@ class CropReportView(APIView):
             return Response(
                 {'message': f'Crop Report with id {pk} not found'}, 
                 status=status.HTTP_404_NOT_FOUND)
-    
 
-    def post(self, request, format=None):
-
-        serializer = CropReportSerializer(data=request.data)
-
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    
-    def put(self, request, pk):
-        
+    @extend_schema(
+        request=CropReportCreateSerializer,
+        responses={200: CropReportCreateSerializer},
+        description='Update a single crop report',
+        methods=["PUT"]
+    )
+    def put(self, request, pk):        
         try:
             cropReportItem = Producer.objects.get(id=pk)
-            serializer = CropReportSerializer(cropReportItem, data=request.data)
+            serializer = CropReportCreateSerializer(cropReportItem, data=request.data)
             if serializer.is_valid(raise_exception=True):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -178,9 +250,13 @@ class CropReportView(APIView):
                 {'message': f'Crop Report with id {pk} not found'}, 
                 status=status.HTTP_404_NOT_FOUND)       
                 
-
-    def delete(self, request, pk):
-        
+    @extend_schema(
+        request=None,
+        responses={200: None},
+        description='Delete a single crop report',
+        methods=["DELETE"]
+    )
+    def delete(self, request, pk):        
         try:
             cropReportItem = Crop.objects.get(id=pk)
             cropReportItem.delete()
